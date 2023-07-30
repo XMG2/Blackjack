@@ -118,6 +118,6 @@ class PlayerCards:
 
 
 deck = Deck()
-playerCards = PlayerCards(["1C", "10P", "11C"])
+playerCards = PlayerCards(deck.getIniCards())
 print(playerCards.printCards())
 print(playerCards.getCardsValue())
