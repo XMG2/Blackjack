@@ -114,10 +114,7 @@ class Player:
             elif 10 <= card_value:
                 value += 10
             else:  # El As
-                if (value + card_value) >= 21:
-                    value += 1
-                else:
-                    value += 11
+                value += 1 if value + 11 > 21 else 11
         return value
 
     def sort_cards(self):
@@ -125,7 +122,7 @@ class Player:
 
 
 class Dealer(Player):
-    def dealer_play(self, deck: Deck):
+    def dealer_play(self, deck: Deck) -> None:
         while self.get_cards_value() < 17:
             card = deck.get_card()
             print(f"Dealers new card {card}")
@@ -165,59 +162,83 @@ class Game:
     def __init__(self):
         self.deck = Deck()
 
-    def play(self):
+    def play(self) -> None:
         print("Game starts")
         player = Player(self.deck.get_ini_cards())
         dealer = Dealer(self.deck.get_ini_cards())
         print(f"Your cards{player.print_cards()}\nValue: {player.get_cards_value()}")
         print(f"Dealers cards{dealer.print_cards()}\nValue: {dealer.get_cards_value()}")
         turn_pass = True
-        while player.get_cards_value() <= 21 and turn_pass:
-            action = self.hit_or_stand()
-            if action == Actions.STAND:
-                turn_pass = False
-            else:
-                self.get_new_card(player)
+        while not self.over_21(player) and turn_pass:
+            turn_pass = self.player_play(player, turn_pass)
         if self.over_21(player):
             print("Sry over 21")
             self.print_loser()
         else:
             print(f"You have {player.get_cards_value()}")
             dealer.dealer_play(self.deck)
-            if self.over_21(dealer) or self.less_value(player, dealer):
-                self.print_win()
-            else:
-                self.print_loser()
+            self.resume_result(player, dealer)
 
-    def hit_or_stand(self):
+    def player_play(self, player: Player, turn_pass: bool) -> bool:
+        action = self.hit_or_stand()
+        if action == Actions.STAND:
+            turn_pass = False
+        else:
+            self.player_new_card(player)
+        return turn_pass
+
+    def hit_or_stand(self) -> Actions:
         more = "_"
         while more != "Y" and more != "N":
             more = str(input("Do you want more cards? (Y/N): ").upper())
-        if more == "N":
-            return Actions.STAND
-        else:
-            return Actions.HIT
+        return Actions.STAND if more == "N" else Actions.HIT
 
-    def get_new_card(self, player):
+    def player_new_card(self, player: Player) -> None:
         card = self.deck.get_card()
         print(f"New card {card}")
         player.add_card(card)
         print(f"New value {player.get_cards_value()}")
 
-    def over_21(self, player):
+    def resume_result(self, player: Player, dealer: Dealer) -> None:
+        if self.blackjack(player):
+            self.print_blackjack()
+        elif self.over_21(dealer) or self.less_value(player, dealer):
+            self.print_win()
+        elif self.is_tie(player, dealer):
+            self.print_tie()
+        else:
+            self.print_loser()
+
+    def over_21(self, player: Player) -> bool:
         return player.get_cards_value() > 21
 
-    def less_value(self, player, dealer):
+    def less_value(self, player: Player, dealer: Dealer) -> bool:
         return dealer.get_cards_value() < player.get_cards_value()
 
-    def print_win(self):
-        print("You won")
+    def is_tie(self, player: Player, dealer: Dealer) -> bool:
+        return dealer.get_cards_value() == player.get_cards_value()
+
+    def blackjack(self, player: Player) -> bool:
+        return player.get_cards_value() == 21
+
+    def print_blackjack(self) -> None:
+        print("BLACKJACK!!")
         print(self.THUMBS_UP)
 
-    def print_loser(self):
+    def print_tie(self) -> None:
+        print("TIE")
+
+    def print_win(self) -> None:
+        print("You won")
+
+    def print_loser(self) -> None:
         print("You are a LOSER")
         print(self.LOSER)
 
 
-game = Game()
-game.play()
+def play_blackjack_game():
+    game = Game()
+    game.play()
+
+
+play_blackjack_game()
