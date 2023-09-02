@@ -181,6 +181,7 @@ class Game:
 
     def player_play(self, player: Player, turn_pass: bool) -> bool:
         if self.blackjack(player):
+            self.print_blackjack()
             turn_pass = False
         else:
             action = self.hit_or_stand()
