@@ -29,6 +29,13 @@ class TestCardValues(unittest.TestCase):
         game = blackjack.Game()
         self.assertEquals(True, game.over_21(player), "Should be passed")
 
+    def test_stop_on_blackjack(self):
+        deck_mock = Mock(spec=blackjack.Deck)
+        deck_mock.get_ini_cards.return_value = ["1P", "13C"]
+        player = blackjack.Player(deck_mock.get_ini_cards())
+        game = blackjack.Game()
+        self.assertEquals(False, game.player_play(player, True), "Should be passed")
+
 
 if __name__ == "__main__":
     unittest.main()

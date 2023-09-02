@@ -180,11 +180,15 @@ class Game:
             self.resume_result(player, dealer)
 
     def player_play(self, player: Player, turn_pass: bool) -> bool:
-        action = self.hit_or_stand()
-        if action == Actions.STAND:
+        if self.blackjack(player):
             turn_pass = False
         else:
-            self.player_new_card(player)
+            action = self.hit_or_stand()
+            match action:
+                case Actions.HIT:
+                    self.player_new_card(player)
+                case Actions.STAND:
+                    turn_pass = False
         return turn_pass
 
     def hit_or_stand(self) -> Actions:
@@ -236,9 +240,6 @@ class Game:
         print(self.LOSER)
 
 
-def play_blackjack_game():
+if __name__ == "__main__":
     game = Game()
     game.play()
-
-
-play_blackjack_game()
